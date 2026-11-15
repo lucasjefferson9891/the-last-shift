@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Last Shift | An Interactive Horror Story</title>
+<style>
+  :root { --bg:#090d10; --panel:#121a1e; --panel2:#182329; --ink:#edf0e9; --muted:#aab7b4; --red:#d56a50; --gold:#d5b77a; --line:#34434a; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; color:var(--ink); background:radial-gradient(ellipse at 50% 0%,#26343a 0%,#10171b 42%,#070a0c 100%); font-family:Georgia, 'Times New Roman', serif; }
+  .shell { width:min(900px, calc(100% - 32px)); margin:0 auto; padding:34px 0 50px; }
+  header { text-align:center; padding:28px 12px 24px; border-bottom:1px solid var(--line); }
+  .eyebrow { color:var(--red); letter-spacing:.28em; font:700 11px Arial,sans-serif; }
+  h1 { margin:12px 0 7px; font-size:clamp(42px,8vw,76px); letter-spacing:.07em; font-weight:normal; text-shadow:0 0 24px #b54c3733; }
+  .tagline { color:var(--muted); font:italic 16px Georgia,serif; }
+  .status { display:flex; justify-content:space-between; gap:12px; color:var(--muted); font:12px Arial,sans-serif; letter-spacing:.08em; margin:20px 2px 10px; text-transform:uppercase; }
+  .track { height:3px; background:#263238; border-radius:9px; overflow:hidden; margin-bottom:18px; }
+  #progress { height:100%; width:6.25%; background:var(--red); transition:width .25s; }
+  main { background:linear-gradient(145deg,#172126,#10171b); border:1px solid #34434a; border-radius:14px; padding:clamp(22px,5vw,42px); box-shadow:0 24px 70px #0008; min-height:390px; }
+  .scene-no { color:var(--gold); font:700 11px Arial,sans-serif; letter-spacing:.2em; text-transform:uppercase; }
+  h2 { font-size:clamp(27px,5vw,39px); font-weight:normal; margin:12px 0 22px; }
+  .story { color:#e1e5df; font-size:18px; line-height:1.78; white-space:pre-line; }
+  .prompt { margin:27px 0 12px; color:var(--gold); font:700 11px Arial,sans-serif; letter-spacing:.18em; text-transform:uppercase; }
+  .choices { display:grid; gap:11px; margin-top:12px; }
+  button { cursor:pointer; color:var(--ink); background:#202d33; border:1px solid #46565c; border-radius:8px; padding:15px 17px; text-align:left; font:15px Arial,sans-serif; line-height:1.45; transition:.18s ease; }
+  button:hover, button:focus-visible { background:#2a3a41; border-color:var(--red); transform:translateY(-1px); outline:none; }
+  button .arrow { color:var(--red); font-weight:bold; margin-right:9px; }
+  .ending { display:inline-block; margin-top:18px; color:var(--gold); border:1px solid #786b4b; padding:7px 11px; border-radius:30px; font:700 10px Arial,sans-serif; letter-spacing:.16em; }
+  .controls { display:flex; justify-content:space-between; gap:10px; margin-top:18px; }
+  .controls button { font-size:12px; padding:11px 14px; color:var(--muted); background:transparent; }
+  footer { text-align:center; color:#78878a; font:12px Arial,sans-serif; margin-top:22px; line-height:1.7; }
+  .hidden { display:none; }
+  @media (max-width:560px) { .shell{width:min(100% - 20px,900px);padding-top:14px} header{padding-top:20px} .story{font-size:16px;line-height:1.72} main{min-height:0} }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="eyebrow">AN INTERACTIVE HORROR MYSTERY</div>
+    <h1>THE LAST SHIFT</h1>
+    <div class="tagline">Some stories refuse to stay buried.</div>
+  </header>
+  <div class="status"><span id="location">THE GATE</span><span id="pageCount">PAGE 1 OF 16</span></div>
+  <div class="track"><div id="progress"></div></div>
+  <main>
+    <div class="scene-no" id="sceneNo">CHAPTER 01</div>
+    <h2 id="sceneTitle">The Gate</h2>
+    <div class="story" id="storyText"></div>
+    <div id="endingTag"></div>
+    <div class="prompt" id="prompt">WHAT DO YOU DO?</div>
+    <div class="choices" id="choices"></div>
+  </main>
+  <div class="controls">
+    <button id="backBtn" type="button">← Previous page</button>
+    <button id="restartBtn" type="button">↻ Start again</button>
+  </div>
+  <footer>
+    Best experienced with the lights low.<br>
+    Your choices shape what happens next.
+  </footer>
+</div>
+<script>
+const scenes = {
+  1: {
+    title:"The Gate", place:"THE GATE",
+    text:`The first thing you notice is the light.
+
+It flickers in a single upstairs window of the enormous factory, blinking on and off like someone is trying to send a message. You stand outside the rusted gates, soaked from the rain, with no memory of how you got here.
+
+You pull out your phone. No signal. The screen says 3:15 am.
+
+A sign hangs crookedly above the entrance: BLACKWOOD INDUSTRIES — EST. 1948. The gate is chained, but the chain lies open on the ground.
+
+From somewhere inside comes a slow metallic bang.
+
+Then, very quietly, a voice whispers your name.`,
+    choices:[["Step through the gate and enter the factory.",2],["Look for another way inside.",2]]
+  },
+  2: {
+    title:"The Main Hall", place:"MAIN HALL",
+    text:`The doors swing shut behind you.
+
+Dust covers the enormous hall, but a trail of muddy footprints cuts through it. They lead towards the back of the factory — and back towards the entrance. You look down. Your shoes are clean.
+
+Above you, a broken clock is frozen at 3:15. Its second hand twitches once, then stops.
+
+A noticeboard is covered in faded photographs of workers. One face has been scratched away so violently that the paper has torn.
+
+Four corridors branch away from the hall. A truck's headlights glow through a loading bay. Somewhere, a phone is ringing. A machine begins to hum.`,
+    choices:[["Follow the muddy footprints towards the loading dock.",3],["Answer the ringing phone in the office.",4],["Follow the humming towards the machine room.",5],["Take the lift down to the lower levels.",6]]
+  },
+  3: {
+    title:"The Loading Dock", place:"LOADING DOCK",
+    text:`An old delivery truck sits beneath the loading-bay lights. Its headlights are on, bright enough to turn the drifting dust into silver sparks.
+
+You walk around it. The bonnet is cold. There is no engine noise, no exhaust, not even a key in the ignition.
+
+On the passenger seat lies a clipboard. The top sheet is dated October 17, 1989. Beneath it, a delivery has been signed for by someone called TOM.
+
+A sudden thud comes from inside the truck's locked cargo area.
+
+The headlights flash three times. In the reflection of the windscreen, someone is standing directly behind you.
+
+When you turn, nobody is there.`,
+    choices:[["Try the cargo door, then follow the footprints.",10],["Run back to the main hall.",2],["Use the truck's side ladder to climb to the outside fire escape.",11]]
+  },
+  4: {
+    title:"The Office", place:"OFFICE",
+    text:`The phone rings on a desk that looks as though its owner has only just stepped away.
+
+You lift the receiver.
+
+“Don't let them start the line,” a man's voice says. “Please. I told them the lever was broken.”
+
+The call crackles. You hear a sharp breath, then: “My name is Tom.”
+
+The line dies.
+
+A brass key hangs from a hook beside the desk. An open diary lies beneath a desk lamp. Its pages are filled with frantic handwriting, and the last page has been torn out.
+
+On the wall, a staff photograph shows the same office. Every worker is smiling except one: Tom, who is staring straight at the camera.`,
+    choices:[["Read Tom's diary carefully.",9],["Take the brass key and head downstairs.",8],["Call out to Tom and promise to listen.",13]]
+  },
+  5: {
+    title:"The Machine Room", place:"MACHINE ROOM",
+    text:`The machine room is colder than the rest of the factory.
+
+Rows of enormous presses stand silent beneath the pipes. Then, one by one, they begin to move. Pistons slam. Belts turn. Warning lights glow red.
+
+You back away as a name appears on the nearest machine, scratched deep into the metal:
+
+TOM.
+
+A yellow safety lever sits beside it. Its handle has snapped clean off. Someone has tied a strip of fabric around the broken base.
+
+A speaker crackles overhead. “Night shift, report to your stations.”
+
+You are alone. At least, you think you are.`,
+    choices:[["Inspect the broken safety lever.",15],["Follow the noise into the ventilation passage.",7],["Head towards the conveyor belt.",10]]
+  },
+  6: {
+    title:"The Lift", place:"LIFT",
+    text:`The lift doors open before you press anything.
+
+Inside, the floor indicator reads 1. You press the button for the ground floor, but the display changes to 0, then -1, then -2.
+
+The lift begins to descend.
+
+A voice comes through the speaker. It sounds like someone speaking from the bottom of a swimming pool.
+
+“Going down.”
+
+You try the emergency stop. Nothing happens. The lights flicker, and for a split second you see another person reflected beside you — a worker in an old uniform, with a dark stain across his chest.
+
+When the doors open, the corridor beyond is not on any floor plan.`,
+    choices:[["Step out and follow the corridor to the basement.",8],["Force open the ceiling hatch and climb into the vent.",7],["Press every button and try to return to the hall.",2]]
+  },
+  7: {
+    title:"The Vent", place:"VENTILATION PASSAGE",
+    text:`The vent is barely wide enough to crawl through.
+
+Your elbows scrape against the metal. Behind you, something moves with a slow, deliberate rhythm.
+
+Scrape. Pause. Scrape.
+
+You stop. It stops.
+
+You crawl faster. The sound speeds up too.
+
+A cold breath brushes the back of your neck. You twist around, but the darkness behind you is empty. Ahead, a narrow grate opens above a room lit by a thin line of blue-white light.
+
+A voice whispers from the other side of the metal: “Don't open it. That's where they left me.”`,
+    choices:[["Lift the grate and climb into the basement.",8],["Keep crawling towards the machine room.",5],["Turn around and crawl back before it reaches you.",14]]
+  },
+  8: {
+    title:"The Basement", place:"BASEMENT",
+    text:`The basement smells of wet concrete and burnt metal.
+
+At the far end is an exit door. You grab the handle and pull. Locked. A keypad beside it has no numbers, only four small lights, all glowing red.
+
+To your right stands a sealed room. Its heavy steel door is covered in warning labels. A thin glowing seam runs around its edges, as if something bright is burning on the other side.
+
+There is a keyhole beneath the handle.
+
+From inside the room comes a soft knocking. Three times.
+
+Then a voice says, “You came back.”`,
+    choices:[["Use the brass key from the office on the sealed door.",16],["Search the basement for another clue.",9],["Try the exit door and force your way out.",12]]
+  },
+  9: {
+    title:"Tom's Diary", place:"THE DIARY",
+    text:`The diary's pages smell of smoke.
+
+Most entries are ordinary: shift times, broken equipment, complaints about management. Then the handwriting changes.
+
+“October 14. The safety lever is broken. I reported it again. They said the line cannot stop.”
+
+“October 16. The night supervisor told us to keep working. I heard a bang from Press Three.”
+
+“October 17. If anyone finds this, please tell them I tried. The lever failed. No one listened.”
+
+The final sentence is written so hard the pen has torn through the paper:
+
+“THEY LOCKED THE DOOR.”
+
+A loose photograph falls from the diary. It shows Tom standing beside a younger version of you.`,
+    choices:[["Take the diary and go to the conveyor belt.",10],["Find Tom and tell him his story will be heard.",13],["Return to the basement and look for the sealed room.",8]]
+  },
+  10: {
+    title:"The Conveyor", place:"CONVEYOR BELT",
+    text:`A conveyor belt groans into life as you enter.
+
+Old cardboard boxes crawl along it, each labelled with a worker's name. Some are stained with oil. Others have been sealed with strips of yellow warning tape.
+
+You find TOM on a box near the end of the belt.
+
+Beyond it, an enormous furnace glows orange. The heat presses against your face. The belt carries the boxes towards the flames, but none of them burn. They simply disappear into the light.
+
+A control panel stands beside the belt. One switch reads STOP. Another reads RELEASE.
+
+Behind you, footsteps begin to approach.`,
+    choices:[["Pull the STOP switch and follow the emergency exit signs.",11],["Search the boxes for Tom's belongings.",13],["Hide behind the control panel and wait.",12]]
+  },
+  11: {
+    title:"The Escape", place:"ESCAPE",
+    text:`You burst through a fire door and stumble onto the street.
+
+Dawn is breaking. Birds call from the power lines. For the first time all night, you can breathe.
+
+You turn to look at the factory.
+
+There is no factory.
+
+Across the empty block stands a row of new apartment buildings. A faded plaque beside the footpath reads: BLACKWOOD INDUSTRIES — SITE CLEARED, 1994.
+
+You stare at the date. The factory was demolished decades ago.
+
+A newspaper box nearby holds an old article about an industrial accident in 1989. The photograph shows a rescue crew carrying someone from the building.
+
+The headline reads: NIGHT WORKER NEVER FOUND.`,
+    ending:"ENDING 01 — THE ONE WHO GOT OUT",
+    choices:[["Start again and uncover what really happened.",1]]
+  },
+  12: {
+    title:"Trapped", place:"TRAPPED",
+    text:`The doors slam shut.
+
+Every machine stops at once. The silence is so complete that you can hear your own heartbeat.
+
+A red light turns on above the exit. Then another. Then every light in the room.
+
+A loudspeaker crackles.
+
+“Thank you for completing your shift. Please remain at your station.”
+
+You pound on the doors until your hands hurt. No one answers.
+
+On the wall, a new timecard slides from a slot. Your name is printed across the top. Beside it is a photograph of you, taken from somewhere inside the factory.
+
+The clock above the door clicks forward.
+
+3:16.
+
+Somewhere in the building, the night shift begins again.`,
+    ending:"ENDING 02 — THE NEW NIGHT-SHIFT WORKER",
+    choices:[["Start again and make a different choice.",1]]
+  },
+  13: {
+    title:"The Friend", place:"TOM'S STORY",
+    text:`“Tom?” you whisper. “I found your diary. I know what happened.”
+
+The air turns still.
+
+A figure appears at the end of the corridor. His uniform is torn and his face is pale, but his eyes are kind. He looks at the diary in your hands.
+
+“I told them,” he says. “Every day, I told them.”
+
+You open the diary and read his final entry aloud. For the first time, the factory's machines do not interrupt.
+
+Tom closes his eyes.
+
+“I thought everyone had forgotten.”
+
+You promise to tell his story. You promise that what happened here will not disappear with the building.
+
+A small smile crosses his face. Then the air around him fills with warm light, and he fades.`,
+    choices:[["Follow the light towards the control panel.",15],["Return to the basement and find the exit.",8]]
+  },
+  14: {
+    title:"Sealed", place:"SEALED",
+    text:`You turn back, but the vent grate is no longer where you left it.
+
+A metallic clang echoes through the passage. The grate slams shut behind you.
+
+The air changes. It becomes painfully cold, and your breath appears in front of your face.
+
+You push against the metal. It does not move.
+
+A thin line of light appears between the bars. A hand presses against the other side — your hand, wearing the same watch.
+
+Then a voice speaks in your own voice.
+
+“You always come back.”
+
+The light goes out.`,
+    ending:"ENDING 03 — BEHIND THE WALL",
+    choices:[["Start again and choose another route.",1]]
+  },
+  15: {
+    title:"The Power Switch", place:"POWER ROOM",
+    text:`The control panel is covered in dust, except for one switch.
+
+A handwritten note is taped above it:
+
+“IF THE LINE STOPS, THEY CAN REST.”
+
+You look through the glass window. The machines are moving without anyone operating them. In their reflections, you can see dozens of workers standing perfectly still.
+
+You think of Tom. You think of the diary, the broken lever and all the names on the boxes.
+
+You place your hand on the switch.
+
+For a moment, the factory seems to hold its breath.
+
+Then you pull it down.
+
+Every machine dies. Every light goes dark. In the silence, a final note appears on the wall, written in fresh white chalk:
+
+“Thank you.”`,
+    ending:"ENDING 04 — REST AT LAST",
+    choices:[["Follow the emergency lights outside.",11],["Wait and see who appears in the darkness.",16]]
+  },
+  16: {
+    title:"The Sealed Room", place:"THE TWIST",
+    text:`The brass key turns by itself.
+
+The sealed door opens with a long, exhausted groan. Inside is a tiny room. No machinery. No boxes. Just a wall covered in photographs.
+
+You step closer.
+
+Every photograph shows you.
+
+You at the gate. You in the main hall. You crawling through the vent. You holding Tom's diary.
+
+Some photographs look decades old. In one, you are wearing the same clothes you have on now.
+
+At the bottom of the wall is a newspaper clipping dated October 17, 1989.
+
+The headline reads: FACTORY ACCIDENT CLAIMS NIGHT WORKER.
+
+Beneath it is your photograph.
+
+You remember everything.
+
+You were never investigating what happened to Tom.
+
+You were trying to remember what happened to you.`,
+    ending:"ENDING 05 — THE LAST WORKER",
+    choices:[["Look at the photograph one last time.",12],["Close the door and let the factory go quiet.",15]]
+  }
+};
+
+let current = 1;
+let history = [];
+const $ = id => document.getElementById(id);
+
+function showScene(id, addHistory=true) {
+  if (!scenes[id]) return;
+  if (addHistory && current !== id) history.push(current);
+  current = id;
+  const s = scenes[id];
+  $("sceneNo").textContent = `CHAPTER ${String(id).padStart(2,"0")}`;
+  $("sceneTitle").textContent = s.title;
+  $("storyText").textContent = s.text;
+  $("location").textContent = s.place;
+  $("pageCount").textContent = `PAGE ${id} OF 16`;
+  $("progress").style.width = `${(id/16)*100}%`;
+  $("endingTag").innerHTML = s.ending ? `<span class="ending">${s.ending}</span>` : "";
+  $("prompt").classList.toggle("hidden", !s.choices.length);
+  $("choices").innerHTML = "";
+  s.choices.forEach(([label,target]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = `<span class="arrow">→</span>${label}`;
+    button.addEventListener("click", () => showScene(target));
+    $("choices").appendChild(button);
+  });
+  $("backBtn").disabled = history.length === 0;
+  $("backBtn").style.opacity = history.length === 0 ? ".35" : "1";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("backBtn").addEventListener("click", () => {
+  if (!history.length) return;
+  const previous = history.pop();
+  showScene(previous,false);
+});
+$("restartBtn").addEventListener("click", () => {
+  history = [];
+  showScene(1,false);
+});
+showScene(1,false);
+</script>
+</body>
+</html>
